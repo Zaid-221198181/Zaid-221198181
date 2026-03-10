@@ -1,0 +1,9 @@
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+sqlalchemy==2.0.28
+psycopg2-binary
+python-multipart==0.0.9
+python-dotenv==1.0.1
+aiofiles
+alembic==1.13.1
+gunicorn==21.2.0
