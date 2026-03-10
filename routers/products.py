@@ -17,7 +17,7 @@ load_dotenv()
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-BASE_URL = os.getenv("BASE_URL", "http://10.0.4.237:8000")
+BASE_URL = os.getenv("BASE_URL", "http://10.0.4.237:8000").rstrip("/")
 STATIC_DIR = os.getenv("STATIC_DIR", "static/images")
 
 
