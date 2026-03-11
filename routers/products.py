@@ -1,5 +1,7 @@
 import os
 import uuid
+import base64
+import httpx
 import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
@@ -19,6 +21,7 @@ router = APIRouter(prefix="/products", tags=["products"])
 
 BASE_URL = os.getenv("BASE_URL", "http://10.0.4.237:8000").rstrip("/")
 STATIC_DIR = os.getenv("STATIC_DIR", "static/images")
+IMGBB_API_KEY = "f16015b91527d838fb8fbaa5a28f557a"
 
 
 @router.post("/", response_model=ProductResponse)
@@ -34,14 +37,22 @@ async def create_product(
     image_url = None
 
     if image and image.filename:
-        os.makedirs(STATIC_DIR, exist_ok=True)
-        ext = os.path.splitext(image.filename)[1]
-        filename = f"{uuid.uuid4().hex}{ext}"
-        file_path = os.path.join(STATIC_DIR, filename)
-        async with aiofiles.open(file_path, "wb") as f:
-            content = await image.read()
-            await f.write(content)
-        image_url = f"{BASE_URL}/static/images/{filename}"
+        content = await image.read()
+        encoded_image = base64.b64encode(content).decode("utf-8")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.imgbb.com/1/upload",
+                data={
+                    "key": IMGBB_API_KEY,
+                    "image": encoded_image
+                }
+            )
+            if response.status_code == 200:
+                data = response.json()
+                image_url = data["data"]["url"]
+            else:
+                print("ImgBB Upload Failed:", response.text)
 
     product = Product(
         title=title,

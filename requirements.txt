@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 aiofiles
 alembic==1.13.1
 gunicorn==21.2.0
+httpx
